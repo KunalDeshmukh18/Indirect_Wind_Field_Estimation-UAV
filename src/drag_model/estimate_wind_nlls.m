@@ -1,6 +1,11 @@
 %options
-interval_start=1;
-interval_end=100;
+interval_start=1500;
+interval_end=3000;
+proposed_wind_speed=0.25;
+if wind_speed~=proposed_wind_speed
+    wind_speed=proposed_wind_speed;
+    sim("quadcopter_package_delivery");
+end
 %
 chassis_states=logsout_quadcopter_package_delivery{4}.Values.Chassis;
 %total mass
@@ -10,7 +15,7 @@ mass_of_t=zeros(size(load_status)).';
 mass_of_t(load_status>-0.5)=drone_and_pkg_mass;
 mass_of_t(load_status<-0.5)=drone_mass;
 %extract times
-times=chassis_states.px.Time(interval_start:interval_end);
+times=chassis_states.px.Time;
 %extract observed accelerations
 v_of_t=[chassis_states.vx;chassis_states.vy;chassis_states.vz];
 obs_times=(times(interval_start:interval_end-1)+times(interval_start+1:interval_end))/2;
@@ -22,6 +27,7 @@ a_obs=[dvxdt,dvydt,dvzdt];
 
 %extract state history
 position_history=[chassis_states.px.Data,chassis_states.py.Data,chassis_states.pz.Data].';
+rpy_history=[squeeze(chassis_states.roll.Data),squeeze(chassis_states.pitch.Data),squeeze(chassis_states.yaw.Data)].';
 quat_history=quaternion(rpy_history.',"euler","XYZ","point");
 velocity_history=[chassis_states.vx.Data,chassis_states.vy.Data,chassis_states.vz.Data].';
 angvel_history=[chassis_states.nPitch.Data,chassis_states.nRoll.Data,chassis_states.nYaw.Data].';
@@ -49,34 +55,36 @@ end
 %estimate wind via NLLS
 N=interval_end-interval_start+1;
 guess_scale=1e-1;
-wind_guess=guess_scale*randn(3,N);
+wind_guess=guess_scale*randn(3,N)+wind_history(:,interval_start:interval_end);
 estimated_wind_flat=lsqnonlin(bind_vars(N,state_history(:,interval_start:interval_end),thrust_history(:,interval_start:interval_end),parameters,a_obs(interval_start:interval_end-1,:)),wind_guess(:));
 estimated_wind=reshape(estimated_wind_flat,3,N);
 %plot
+interval_times=times(interval_start:interval_end);
+
 figure()
 subplot(3,1,1)
 hold on
-plot(times,wind_guess(1,:),":o")
-plot(times,wind_history(1,interval_start:interval_end))
-plot(times,estimated_wind(1,:))
+plot(interval_times,wind_guess(1,:),":o")
+plot(interval_times,wind_history(1,interval_start:interval_end))
+plot(interval_times,estimated_wind(1,:))
 legend("Guess","Observed","Estimated")
 ylabel("X Wind")
 hold off
 
 subplot(3,1,2)
 hold on
-plot(times,wind_guess(2,:),":o")
-plot(times,wind_history(2,interval_start:interval_end))
-plot(times,estimated_wind(2,:))
+plot(interval_times,wind_guess(2,:),":o")
+plot(interval_times,wind_history(2,interval_start:interval_end))
+plot(interval_times,estimated_wind(2,:))
 legend("Guess","Observed","Estimated")
 ylabel("Y Wind")
 hold off
 
 subplot(3,1,3)
 hold on
-plot(times,wind_guess(3,:),":o")
-plot(times,wind_history(3,interval_start:interval_end))
-plot(times,estimated_wind(3,:))
+plot(interval_times,wind_guess(3,:),":o")
+plot(interval_times,wind_history(3,interval_start:interval_end))
+plot(interval_times,estimated_wind(3,:))
 legend("Guess","Observed","Estimated")
 ylabel("Z Wind")
 hold off
