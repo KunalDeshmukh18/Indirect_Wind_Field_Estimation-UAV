@@ -1,7 +1,7 @@
 %options
 interval_start=1500;
-interval_end=3000;
-proposed_wind_speed=0.25;
+interval_end=1600;
+proposed_wind_speed=0;
 if wind_speed~=proposed_wind_speed
     wind_speed=proposed_wind_speed;
     sim("quadcopter_package_delivery");

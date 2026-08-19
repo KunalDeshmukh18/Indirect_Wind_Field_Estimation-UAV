@@ -27,7 +27,7 @@ Cd=diag(parameters(8:10));
 
 quat_body_to_world=quatinv(quat_world_to_body);
 airspeed_in_body_frame=quatrotate(quat_world_to_body,v-wind_velocity.');
-drag_force_in_world=quatrotate(quat_body_to_world,-(Cd*airspeed_in_body_frame.'.^2).'/2);
+drag_force_in_world=quatrotate(quat_body_to_world,-(Cd*(vecnorm(airspeed_in_body_frame,2,1).'.*airspeed_in_body_frame.')).'/2);
 thrust_accel=(quatrotate(quat_body_to_world,(Bf*control).')./mass).';
 drag_accel=(drag_force_in_world./mass).';
 linear_accel_in_world= g+thrust_accel+drag_accel;

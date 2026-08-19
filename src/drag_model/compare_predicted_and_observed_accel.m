@@ -1,6 +1,7 @@
 %options
 plot_thrust=false;
 plot_drag=false;
+plot_pos_and_vel=false;
 %
 chassis_states=logsout_quadcopter_package_delivery{4}.Values.Chassis;
 %total mass
@@ -22,6 +23,7 @@ a_obs=[dvxdt,dvydt,dvzdt];
 
 %extract state history
 position_history=[chassis_states.px.Data,chassis_states.py.Data,chassis_states.pz.Data].';
+rpy_history=[squeeze(chassis_states.roll.Data),squeeze(chassis_states.pitch.Data),squeeze(chassis_states.yaw.Data)].';
 quat_history=quaternion(rpy_history.',"euler","XYZ","point");
 velocity_history=[chassis_states.vx.Data,chassis_states.vy.Data,chassis_states.vz.Data].';
 angvel_history=[chassis_states.nPitch.Data,chassis_states.nRoll.Data,chassis_states.nYaw.Data].';
@@ -42,27 +44,34 @@ parameters=[drone_and_pkg_mass;zeros(6,1);qd_drag.Cd_X*qd_area.YZ;qd_drag.Cd_Y*q
 
 %plot
 figure()
-subplot(3,3,1)
-plot(times,position_history(1,:))
-ylabel("X pos")
-subplot(3,3,2)
-plot(times,position_history(2,:))
-ylabel("Y pos")
-subplot(3,3,3)
-plot(times,position_history(3,:))
-ylabel("Z pos")
+if plot_pos_and_vel
+    plot_cols=3;
+    subplot(3,3,1)
+    plot(times,position_history(1,:))
+    ylabel("X pos")
+    subplot(3,3,2)
+    plot(times,position_history(2,:))
+    ylabel("Y pos")
+    subplot(3,3,3)
+    plot(times,position_history(3,:))
+    ylabel("Z pos")
+    
+    subplot(3,3,4)
+    plot(times,velocity_history(1,:))
+    ylabel("X vel")
+    subplot(3,3,5)
+    plot(times,velocity_history(2,:))
+    ylabel("Y vel")
+    subplot(3,3,6)
+    plot(times,velocity_history(3,:))
+    ylabel("Z vel")
 
-subplot(3,3,4)
-plot(times,velocity_history(1,:))
-ylabel("X vel")
-subplot(3,3,5)
-plot(times,velocity_history(2,:))
-ylabel("Y vel")
-subplot(3,3,6)
-plot(times,velocity_history(3,:))
-ylabel("Z vel")
-
-subplot(3,3,7)
+    plot_idx=6;
+else
+    plot_cols=1;
+    plot_idx=0;
+end
+subplot(3,plot_cols,plot_idx+1)
 hold on
 plot(obs_times,a_obs(:,1))
 plot(times,predicted_acceleration(1,:))
@@ -84,7 +93,7 @@ end
 
 ylabel("X accel")
 hold off
-subplot(3,3,8)
+subplot(3,plot_cols,plot_idx+2)
 hold on
 plot(obs_times,a_obs(:,2))
 plot(times,predicted_acceleration(2,:))
@@ -105,7 +114,7 @@ else
 end
 ylabel("Y accel")
 hold off
-subplot(3,3,9)
+subplot(3,plot_cols,plot_idx+3)
 hold on
 plot(obs_times,a_obs(:,3))
 plot(times,predicted_acceleration(3,:))
