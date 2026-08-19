@@ -1,0 +1,168 @@
+% This script graphs the transient response of the following drone states:
+% Pitch, Pitch Rate (nPitch), Motor Current, Propeller Angular Velocity
+% to a step changes in wind speed.
+% Part 1: Wind speed changes from same base value to a final value, e.g. 0 to 1,2,3 or 4.
+% Part 2: Sequential change in wind speed i.e. 0-1, 1-2, 2-3, 3-4.
+
+clc
+clearvars
+Simulink.sdi.clear
+
+openProject("/Users/kunaldeshmukh/Documents/MATLAB/Examples/R2026a/MathWorks-Teaching-Resources-Quadcopter-Modeling-Simulation-61167f7/QuadcopterDrone/Quadcopter_Drone.prj")
+
+%% Part 1: Step wind speed change from base value
+
+Initial_WindSpeed = 0; % Set the initial value of wind speed (TODO)
+Final_WindSpeed_Sweep = 1:4; % Set the sweep range for final wind speed (TODO)
+
+mdl = "Models/quadcopter_package_delivery.slx";
+
+% Pre-allocating the 'in' variable to contain the Simulink object - which contains all information (variables, block parameters etc.)
+% required to run a simulation independently from other simulations.
+in(length(Final_WindSpeed_Sweep)) = Simulink.SimulationInput(mdl);
+
+for i = 1:length(Final_WindSpeed_Sweep)
+    in(i) = Simulink.SimulationInput(mdl); % Creating a Simulink object for each value of Final Wind Speed
+    in(i) = in(i).setVariable('Final_WindSpeed',Final_WindSpeed_Sweep(i)); % Setting the value of Final Wind Speed
+end
+
+Simout = parsim(in,"ShowSimulationManager","on") % Running simulations parallelly for settings defined each 'in' column.
+
+
+%% Plotting Transient Responses for change in Final Wind Speed from same base value
+% Plot a consolidated graph for each signal, to observe the change in the
+% signal for different wind speeds.
+
+% Plotting transient response of drone chassis pitch for various base - final wind speed values.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Simout(i).tout,rad2deg(squeeze(Simout(i).logsout_quadcopter_package_delivery{4}.Values.Chassis.pitch.Data)))
+end
+xlabel("Time (sec)")
+ylabel("Pitch Angle (deg)")
+title("Time vs Drone Chassis Pitch, for Initial Wind Speed=0, and varying Final Wind Speed");
+legend(arrayfun(@(x) sprintf('Final Wind Speed = %d', x), Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for rate of change of pitch angle of drone chassis, for various base - final wind speed values.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Simout(i).tout,rad2deg(Simout(i).logsout_quadcopter_package_delivery{4}.Values.Chassis.nPitch.Data))
+end
+xlabel("Time (sec)")
+ylabel("Rate of change of Pitch Angle (deg/sec)")
+title("Time vs Drone Chassis Pitch Rate, for Initial Wind Speed=0, and varying Final Wind Speed");
+legend(arrayfun(@(x) sprintf('Final Wind Speed = %d', x), Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for Motor 1 current, for various base - final wind speed values.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Simout(i).tout,Simout(i).logsout_quadcopter_package_delivery{4}.Values.Motor.Mot1.i.Data)
+end
+xlabel("Time (sec)")
+ylabel("Current (A)")
+title("Time vs Motor 1 Current, for Initial Wind Speed=0, and varying Final Wind Speed");
+legend(arrayfun(@(x) sprintf('Final Wind Speed = %d', x), Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for angular velocity of Propeller 1, for various base - final wind speed values.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Simout(i).tout,Simout(i).logsout_quadcopter_package_delivery{4}.Values.Prop1.w.Data)
+end
+xlabel("Time (sec)")
+ylabel("Angular Velocity (RPM)")
+title("Time vs Propeller 1 Angular Velocity, for Initial Wind Speed=0, and varying Final Wind Speed");
+legend(arrayfun(@(x) sprintf('Final Wind Speed = %d', x), Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+
+
+%% Part 2: Sequential change in Wind Speed
+
+% Note: Generally the initial value of wind speed should be lesser than the
+% final value, for every instance of the initial and final value pair.
+Initial_WindSpeed_Sweep = 0:3; % Set the sweep range for initial value of wind speed (TODO)
+Final_WindSpeed_Sweep = 1:4; % Set the sweep range for final value of wind speed (TODO)
+
+% Checking whether the initial and final wind speed sweep matrices contain equal no.of elements
+if length(Final_WindSpeed_Sweep) ~= length(Initial_WindSpeed_Sweep)
+    error("The Initial and Final Wind Speed sweep values must contain equal no.of elements.");
+end
+
+mdl = "Models/quadcopter_package_delivery.slx";
+
+% Pre-allocating the 'in' variable to contain the Simulink object - which contains all information (variables, block parameters etc.)
+% required to run a simulation independently from other simulations.
+in(length(Final_WindSpeed_Sweep)) = Simulink.SimulationInput(mdl);
+
+for i = 1:length(Final_WindSpeed_Sweep)
+    in(i) = Simulink.SimulationInput(mdl); % Creating a Simulink object for each Initial & Final Wind Speed pair
+    in(i) = in(i).setVariable("Initial_WindSpeed",Initial_WindSpeed_Sweep(i)); % Setting the value of initial wind speed
+    in(i) = in(i).setVariable("Final_WindSpeed", Final_WindSpeed_Sweep(i)); % Setting the value of final wind speed
+end
+
+Seq_SimOut = parsim(in, "ShowSimulationManager","on") % Running simulations parallelly for settings defined each 'in' column.
+
+%% Plotting the Transient Responses for Sequential change in Wind Speed value
+
+% Plotting transient response of drone chassis pitch angle, for sequential change in wind speed.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Seq_SimOut(i).tout,rad2deg(squeeze(Seq_SimOut(i).logsout_quadcopter_package_delivery{4}.Values.Chassis.pitch.Data)))
+end
+xlabel("Time (sec)")
+ylabel("Pitch Angle (deg)")
+title("Time vs Drone Chassis Pitch, for sequential change in wind speed");
+legend(arrayfun(@(x,y) sprintf('Initial Wind Speed = %d and Final Wind Speed = %d', x,y), Initial_WindSpeed_Sweep, Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for rate of change of pitch angle of drone chassis, for sequential change in wind speed.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Seq_SimOut(i).tout,rad2deg(Seq_SimOut(i).logsout_quadcopter_package_delivery{4}.Values.Chassis.nPitch.Data))
+end
+xlabel("Time (sec)")
+ylabel("Rate of change of Pitch Angle (deg/sec)")
+title("Time vs Drone Chassis Pitch Rate, for sequential change in wind speed");
+legend(arrayfun(@(x,y) sprintf('Initial Wind Speed = %d and Final Wind Speed = %d', x,y), Initial_WindSpeed_Sweep, Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for Motor 1 current, for sequential change in wind speed.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Seq_SimOut(i).tout,Seq_SimOut(i).logsout_quadcopter_package_delivery{4}.Values.Motor.Mot1.i.Data)
+end
+xlabel("Time (sec)")
+ylabel("Current (A)")
+title("Time vs Motor 1 Current, for sequential change in wind speed");
+legend(arrayfun(@(x,y) sprintf('Initial Wind Speed = %d and Final Wind Speed = %d', x,y), Initial_WindSpeed_Sweep, Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;
+
+% Plotting transient response for angular velocity of Propeller 1, for sequential change in wind speed.
+figure;
+hold on;
+for i = 1:length(Final_WindSpeed_Sweep)
+    plot(Seq_SimOut(i).tout,Seq_SimOut(i).logsout_quadcopter_package_delivery{4}.Values.Prop1.w.Data)
+end
+xlabel("Time (sec)")
+ylabel("Angular Velocity (RPM)")
+title("Time vs Propeller 1 Angular Velocity, for sequential change in wind speed");
+legend(arrayfun(@(x,y) sprintf('Initial Wind Speed = %d and Final Wind Speed = %d', x,y), Initial_WindSpeed_Sweep, Final_WindSpeed_Sweep, 'UniformOutput', false));
+grid on;
+hold off;

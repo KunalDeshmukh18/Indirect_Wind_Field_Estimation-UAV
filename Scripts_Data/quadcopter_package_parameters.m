@@ -38,7 +38,7 @@ propeller.Kdrag    = 0.01;
 
 air_rho            = 1.225;  % kg/m^3
 air_temperature    = 273+25; % degK
-wind_speed         = 4; % Default: 0;      % Wind speed (m/s)
+wind_speed         = 0;      % Wind speed (m/s)
 
 %% Leg parameters
 drone_leg.Extr_Data = flipud([...
