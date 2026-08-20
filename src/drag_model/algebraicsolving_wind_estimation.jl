@@ -48,7 +48,7 @@ end
 # dLdw=differentiate(loss,w);
 # dLdw_subs=subs(dLdw,airspeed=>s)
 airspeed_constraint=[s[i]^2-relative_velocity[i,:]'*relative_velocity[i,:] for i in 1:timesteps]
-system_state_vec=[vec(w);s]
+system_state_vec=[w[1,:];s[1];w[2,:];s[2];w[3,:];s[3];w[4,:];s[4]]
 system_param_vec=[m;g;vec(Cd);vec(a_o);vec(u);vec(R);vec(v);vec(Σ⁻)];
 equations=[vec(sdLdw);airspeed_constraint];
 
@@ -70,6 +70,6 @@ random_param_vec=[m_val;g_val;vec(Cd_val);vec(a_val);vec(u_val);vec(R_val);vec(v
 # rational_parameters=rationalize.(random_param_vec) rationalizing before passing to symengine is substantially slower.
 eqns_random_instance=subs_SymEngineArrayExpr(equations,system_param_vec,random_param_vec);
 #setup AlgebraicSolving
-ring,as_vars=polynomial_ring(QQ,[["w$(i)_$(j)" for i in 1:timesteps for j in 1:3]... ["s$(k)" for k in 1:timesteps]...])
+ring,as_vars=polynomial_ring(QQ,vcat([vcat(["w$(i)_$(j)" for j in 1:3], ["s$(i)"]) for i in 1:timesteps]...))
 flambda=lambdify(eqns_random_instance,system_state_vec)
-ideal=Ideal(flambda(as_vars[1,:]...));
+ideal=Ideal(flambda(as_vars...));
