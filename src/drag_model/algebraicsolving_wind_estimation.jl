@@ -50,7 +50,7 @@ end
 airspeed_constraint=[s[i]^2-relative_velocity[i,:]'*relative_velocity[i,:] for i in 1:timesteps]
 system_state_vec=[w[1,:];s[1];w[2,:];s[2];w[3,:];s[3];w[4,:];s[4]]
 system_param_vec=[m;g;vec(Cd);vec(a_o);vec(u);vec(R);vec(v);vec(Σ⁻)];
-equations=[vec(sdLdw);airspeed_constraint];
+equations=vcat([[sdLdw[i,:];airspeed_constraint[i]] for i in 1:timesteps]...);
 
 #generic parameter values
 
