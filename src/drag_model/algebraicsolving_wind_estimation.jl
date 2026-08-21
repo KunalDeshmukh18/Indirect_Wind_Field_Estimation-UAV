@@ -72,4 +72,5 @@ eqns_random_instance=subs_SymEngineArrayExpr(equations,system_param_vec,random_p
 #setup AlgebraicSolving
 ring,as_vars=polynomial_ring(QQ,vcat([vcat(["w$(i)_$(j)" for j in 1:3], ["s$(i)"]) for i in 1:timesteps]...))
 flambda=lambdify(eqns_random_instance,system_state_vec)
-ideal=Ideal(flambda(as_vars...));
+converted_eqns=flambda(as_vars...);
+ideal=Ideal(converted_eqns);
