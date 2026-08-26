@@ -2,6 +2,11 @@
 plot_thrust=false;
 plot_drag=false;
 plot_pos_and_vel=false;
+proposed_wind_speed=1;
+if wind_speed~=proposed_wind_speed
+    wind_speed=proposed_wind_speed;
+    sim("quadcopter_package_delivery");
+end
 %
 chassis_states=logsout_quadcopter_package_delivery{4}.Values.Chassis;
 %total mass
