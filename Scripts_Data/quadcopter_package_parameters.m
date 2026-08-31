@@ -1,6 +1,9 @@
 % Parameters for quadcopter_package_delivery
 % Copyright 2021-2026 The MathWorks, Inc.
 
+% Simulation Time
+Simulation_Time = 75;
+
 % Size of the ground
 planex = 12.5;           % m
 planey = 8.5;            % m
@@ -10,10 +13,10 @@ planedepth = 0.2;        % m, distance from plane to the reference frame
 battery_capacity = 7.6*3;
 
 %% Material Property
-% Assuming the arm of the drone is manufractured by 3D Printing, the ideal
+% Assuming the arm of the drone is manufactured by 3D Printing, the ideal
 % material is PLA, safe, light and cheap, the only concern is its thermal
 % property
-rho_pla   = 1.25;            % g/cm^3 
+rho_pla   = 10;        % g/cm^3 
 
 % Measured drone mass
 drone_mass = 1.2726;
@@ -24,10 +27,11 @@ pkgGrndTransW = 1e-3;
 
 
 %% Package parameters
-pkgSize = [1 1 1]*0.14; % m
-pkgDensity = 1/(pkgSize(1)*pkgSize(2)*pkgSize(3)); % kg/m^3
+pkgSize = [0.0001 0.0001 0.0001]; % Default: [1 1 1]*0.14; % m
+pkgDensity = 0.0001; % Default: 1/(pkgSize(1)*pkgSize(2)*pkgSize(3)); % kg/m^3
 
 %% Propeller parameters
+
 propeller.diameter = 0.254; % m
 propeller.Kthrust  = 0.1072; 
 propeller.Kdrag    = 0.01;
@@ -51,6 +55,7 @@ drone_leg.Extr_Data = flipud([...
 drone_leg.width = 0.01;
 
 %% Motor parameters
+
 qc_motor.max_torque = 0.8;  % N*m
 qc_motor.max_power  = 160;  % W
 qc_motor.time_const = 0.02; % sec
@@ -98,6 +103,7 @@ filtSpd_motor    = 0.001;
 limit_motor    = 0.25;
 
 %% Drag coefficients
+
 qd_drag.Cd_X = 0.35;
 qd_drag.Cd_Y = 0.35;
 qd_drag.Cd_Z = 0.6;
