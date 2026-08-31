@@ -3,3 +3,5 @@ work/*
 *.asv
 src/drag_model/.ipynb_checkpoints/*
 resources/project/*
+*/.DS_Store
+.DS_Store
