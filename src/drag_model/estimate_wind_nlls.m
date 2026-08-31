@@ -1,5 +1,5 @@
-cd('/Users/kunaldeshmukh/Documents/MATLAB/Examples/R2026a/MathWorks-Teaching-Resources-Quadcopter-Modeling-Simulation-61167f7/Dr_Gutow_Files/');
-openProject("Quadcopter_Drone.prj");
+%cd('/Users/kunaldeshmukh/Documents/MATLAB/Examples/R2026a/MathWorks-Teaching-Resources-Quadcopter-Modeling-Simulation-61167f7/Dr_Gutow_Files/');
+%openProject("Quadcopter_Drone.prj");
 %% Setting Parameter Values and Running Simulation
 Initial_WindSpeed = 1;
 Final_WindSpeed = 2;
@@ -7,8 +7,8 @@ Step_Time = 40; % Time at which wind speed changes value in a step manner.
 Simulation_Time = 80; % Total Simulation Time
 sim("quadcopter_package_delivery");
 %% NLLS Estimation
-interval_start = 18025; % Time index approx 5 sec before step time.
-interval_end = 19039; % Time index approx 5 sec after step time.
+interval_start = 17900; % Time index approx 5 sec before step time.
+interval_end = 18100; % Time index approx 5 sec after step time.
 %total mass
 drone_and_pkg_mass=prod(pkgSize)*pkgDensity+drone_mass;
 load_status=logsout_quadcopter_package_delivery{4}.Values.Load.status.Data;
@@ -46,18 +46,7 @@ wind_history=[wind_struct.vx.Data,wind_struct.vy.Data,wind_struct.vz.Data].';
 %build parameter vector
 parameters=[drone_and_pkg_mass;zeros(6,1);qd_drag.Cd_X*qd_area.YZ;qd_drag.Cd_Y*qd_area.XZ;qd_drag.Cd_Z*qd_area.XY];
 
-cd("/Users/kunaldeshmukh/Documents/MATLAB/Examples/R2026a/MathWorks-Teaching-Resources-Quadcopter-Modeling-Simulation-61167f7/Dr_Gutow_Files/src/drag_model/");
-
-function handle=bind_vars(N,state_history,thrust_history,parameters,a_obs)
-    function diffs=accel_errors(flat_wind_estimate)
-        wind_estimate=reshape(flat_wind_estimate,3,N);
-        [predicted_acceleration,thrust_accel,drag_accel]=quadratic_drag_nominal_linear_acceleration(state_history,thrust_history,parameters,wind_estimate);
-        midpoint_predictions=(predicted_acceleration(:,1:end-1)+predicted_acceleration(:,2:end)).'/2;
-        difference=a_obs-midpoint_predictions;
-        diffs=difference(:);
-    end
-handle=@accel_errors;
-end
+%cd("/Users/kunaldeshmukh/Documents/MATLAB/Examples/R2026a/MathWorks-Teaching-Resources-Quadcopter-Modeling-Simulation-61167f7/Dr_Gutow_Files/src/drag_model/");
 
 %% estimate wind via NLLS
 N=interval_end-interval_start+1;
@@ -92,17 +81,16 @@ fprintf("Building Problem object: ")
 tic
 problem=optimproblem(Objective=lsqobj);
 toc
-%% Plot
+%% Solve
 x0.w=wind_guess(:);
 options=optimoptions(@lsqnonlin,Display="iter");
 tic
 [sol,loss,exitFlag]=solve(problem,x0,Options=options);
 toc
-% estimated_wind_flat=lsqnonlin(bind_vars(N,state_history(:,interval_start:interval_end),thrust_history(:,interval_start:interval_end),parameters,a_obs(interval_start:interval_end-1,:)),wind_guess(:));
 estimated_wind=reshape(sol.w,3,N);
 converged_accel=evaluate(predicted_acceleration,sol);
 %% plot
-interval_times=interval_start:interval_end;
+interval_times=time(interval_start:interval_end);
 
 figure()
 subplot(3,2,1)
