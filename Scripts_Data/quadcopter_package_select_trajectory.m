@@ -74,13 +74,37 @@ switch (path_number)
         
     case 6
         waypoints = [ ...
-            0    0 150 150 150
-            0    0 0   150 150
-            0.15 6 6   6   0.14];
+            0 0 150 150 150
+            0 0 0   150 150
+            0 6 6   6   0.14];
         max_speed = 2;
         min_speed = 0.1;
         xApproach = [4 1];
         vApproach = 0.1;
+
+    case 7
+        % Note: This trajectory defines the waypoints, spline data, and yaw
+        % data explicitly and does not use the function to calculate the
+        % target speed and yaw angle based on the path.
+        waypoints = [...
+            -2   -2    -2     -2  -2  -2 -2  -2  -2 -2 -2 -2 -2 -2
+            -2   -2    -2     -2  -2  -2 -2  -2  -2 -2 -2 -2  -2 -2
+            0.15 0.15   4   4   4   4  4   4   4  4  4  4  4  0.14];
+        spline_data = waypoints';
+        timespot_spl = [0:4:11*4 11*4+6 11*4+6+6]';
+        spline_yaw   = [0 0 0 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2 pi/2];
+
+    case 8
+        % Note: This trajectory defines the waypoints, spline data, and yaw
+        % data explicitly and does not use the function to calculate the
+        % target speed and yaw angle based on the path.
+        waypoints = [...
+            4   4    4     4  4  4 4  4  4 4 4 4 4 4
+            4   4    4     4  4  4 4  4  4 4 4 4 4 4
+            0.15 0.15   4  4  4  4 4  4  4 4 4 4 4 0.14];
+        spline_data = waypoints';
+        timespot_spl = [0:4:11*4 11*4+6 11*4+6+6]';
+        spline_yaw   = [0 0 0 0 0 0 0 0 0 0 0 0 0 0];
 end
 
 % Only call the function to calculate target speed and yaw angle if needed
