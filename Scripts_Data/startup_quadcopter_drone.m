@@ -22,7 +22,7 @@ if(open_start_content)
     % Parameters
     quadcopter_package_parameters;
     % Define trajectory
-    [waypoints, timespot_spl, spline_data, spline_yaw, wayp_path_vis] = quadcopter_package_select_trajectory(1,true);
+    [waypoints, timespot_spl, spline_data, spline_yaw, wayp_path_vis] = quadcopter_package_select_trajectory(8,false);
     % Set Python environment (if needed)
     check_pyenv
     % Open Model

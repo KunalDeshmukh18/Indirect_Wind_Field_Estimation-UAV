@@ -2,7 +2,7 @@
 % Copyright 2021-2026 The MathWorks, Inc.
 
 % Simulation Time
-Simulation_Time = 75;
+Simulation_Time = 50;
 
 % Size of the ground
 planex = 12.5;           % m
@@ -27,8 +27,8 @@ pkgGrndTransW = 1e-3;
 
 
 %% Package parameters
-pkgSize = [0.0001 0.0001 0.0001]; % Default: [1 1 1]*0.14; % m
-pkgDensity = 0.0001; % Default: 1/(pkgSize(1)*pkgSize(2)*pkgSize(3)); % kg/m^3
+pkgSize = [1 1 1]*0.14; % m
+pkgDensity = 1/(pkgSize(1)*pkgSize(2)*pkgSize(3)); % kg/m^3
 
 %% Propeller parameters
 
